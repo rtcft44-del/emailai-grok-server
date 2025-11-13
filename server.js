@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.post("/api/grok", async (req, res) => {
   try {
-    const response = await fetch("https://api.grok.x.ai/v1/chat/completions", {
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.GROK_API_KEY}`,
