@@ -16,7 +16,7 @@ app.post("/api/grok", async (req, res) => {
     const { messages } = req.body;
     const userMessage = messages[messages.length - 1].content;
 
-    const response = await fetch("https://api-inference.huggingface.co/models/facebook/bart-large-cnn", {
+    const response = await fetch("https://api-inference.huggingface.co/models/sshleifer/distilbart-cnn-12-6", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${HF_TOKEN}`,
