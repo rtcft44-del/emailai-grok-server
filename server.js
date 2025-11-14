@@ -14,44 +14,27 @@ const HF_TOKEN = process.env.HF_TOKEN;
 app.post("/api/grok", async (req, res) => {
   try {
     const { messages } = req.body;
-    const userMessage = messages[messages.length - 1]?.content;
-
-    if (!userMessage) {
-      return res.json({
-        choices: [{ message: { content: "هیچ متنی برای خلاصه وجود ندارد." } }]
-      });
-    }
+    const userMessage = messages[messages.length - 1].content;
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-large",
+      "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
       {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${HF_TOKEN}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ inputs: "summarize: " + userMessage })
+        body: JSON.stringify({ inputs: userMessage })
       }
     );
 
     const data = await response.json();
-    console.log("Hugging Face raw response:", data);
+    const summary = data[0]?.summary_text || "خلاصه در دسترس نیست";
 
-    let summary = "خلاصه نشد";
-
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      summary = data[0].generated_text;
-    } else if (data?.error) {
-      summary = "خطای مدل: " + data.error;
-    }
-
-    res.json({
-      choices: [{ message: { content: summary } }]
-    });
-
+    res.json({ choices: [{ message: { content: summary } }] });
   } catch (error) {
-    console.error("Server Error:", error);
-    res.status(500).json({ choices: [{ message: { content: "خطای سرور" } }] });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
