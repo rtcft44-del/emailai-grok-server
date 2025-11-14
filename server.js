@@ -16,21 +16,19 @@ app.post("/api/grok", async (req, res) => {
     const { messages } = req.body;
     const userMessage = messages[messages.length - 1].content;
 
-    const response = await fetch("https://router.huggingface.co/hf-inference", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${HF_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "facebook/bart-large-cnn",
-        inputs: userMessage,
-        parameters: {
-          max_length: 100,
-          min_length: 30
-        }
-      })
-    });
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/google/flan-t5-base",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${HF_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          inputs: "summarize: " + userMessage
+        })
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
@@ -38,7 +36,7 @@ app.post("/api/grok", async (req, res) => {
     }
 
     const data = await response.json();
-    const summary = data[0]?.summary_text || data.generated_text || "خلاصه در دسترس نیست";
+    const summary = data[0]?.generated_text || "خلاصه در دسترس نیست";
 
     res.json({ choices: [{ message: { content: summary } }] });
   } catch (error) {
