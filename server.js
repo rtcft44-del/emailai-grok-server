@@ -16,13 +16,15 @@ app.post("/api/grok", async (req, res) => {
     const { messages } = req.body;
     const userMessage = messages[messages.length - 1].content;
 
-    const response = await fetch("https://api-inference.huggingface.co/models/sshleifer/distilbart-cnn-12-6", {
+    const response = await fetch("https://api-inference.huggingface.co/models/Falconsai/text_summarization", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${HF_TOKEN}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ inputs: userMessage })
+      body: JSON.stringify({
+        inputs: userMessage
+      })
     });
 
     const data = await response.json();
@@ -32,7 +34,7 @@ app.post("/api/grok", async (req, res) => {
       choices: [{ message: { content: summary } }]
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
