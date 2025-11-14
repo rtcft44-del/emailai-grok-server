@@ -32,12 +32,12 @@ app.post("/api/grok", async (req, res) => {
 
     const data = await response.json();
 
-    const summary = data?.[0]?.generated_text || "خلاصه نشد";
+    // این خط درست شد!
+    const summary = data?.generated_text || "خلاصه نشد";
 
     res.json({
       choices: [{ message: { content: summary } }]
     });
-
   } catch (error) {
     console.error("Hugging Face Error:", error);
     res.status(500).json({ error: "Server error" });
