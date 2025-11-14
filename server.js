@@ -16,7 +16,7 @@ app.post("/api/grok", async (req, res) => {
     const { messages } = req.body;
     const userMessage = messages[messages.length - 1].content;
 
-    const response = await fetch("https://api-inference.huggingface.co/models/Falconsai/text_summarization", {
+    const response = await fetch("https://api-inference.huggingface.co/models/google/pegasus-xsum", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${HF_TOKEN}`,
@@ -28,7 +28,7 @@ app.post("/api/grok", async (req, res) => {
     });
 
     const data = await response.json();
-    const summary = data[0]?.summary_text || "خلاصه در دسترس نیست";
+    const summary = data[0]?.generated_text || data[0]?.summary_text || data[0]?.text || "خلاصه در دسترس نیست";
 
     res.json({
       choices: [{ message: { content: summary } }]
