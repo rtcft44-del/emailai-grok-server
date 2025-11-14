@@ -11,16 +11,9 @@ app.use(express.json());
 
 const HF_TOKEN = process.env.HF_TOKEN;
 
-if (!HF_TOKEN) {
-  console.error("HF_TOKEN is not provided in environment variables.");
-  process.exit(1);
-}
-
 app.post("/api/grok", async (req, res) => {
   try {
     const { messages } = req.body;
-
-    // Validate input
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "Invalid messages array" });
     }
@@ -37,27 +30,31 @@ app.post("/api/grok", async (req, res) => {
           "Authorization": `Bearer ${HF_TOKEN}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ inputs: userMessage })
+        body: JSON.stringify({
+          inputs: userMessage,
+          parameters: {
+            max_length: 100,
+            min_length: 30
+          }
+        })
       }
     );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       const errorMessage = errorData?.error || `HTTP error! status: ${response.status}`;
-      return…
-```js
       return res.status(500).json({ error: errorMessage });
     }
 
     const data = await response.json();
-    console.log("Raw response from Hugging Face:", data); // Debug
+    console.log("Raw response from Hugging Face:", data); // Debug: Log the raw response
 
-    // این خط درست شد!
+    // این خط درست شد – bart-large-cnn همیشه data[0].summary_text داره
     const summary = data[0]?.summary_text || "خلاصه در دسترس نیست";
 
     res.json({ choices: [{ message: { content: summary } }] });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Hugging Face Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
