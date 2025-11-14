@@ -32,8 +32,8 @@ app.post("/api/grok", async (req, res) => {
 
     const data = await response.json();
 
-    // این خط درست شد!
-    const summary = data?.generated_text || "خلاصه نشد";
+    // ✅ اصلاح شده: پاسخ مدل یک آرایه است
+    const summary = data?.[0]?.generated_text || "خلاصه نشد";
 
     res.json({
       choices: [{ message: { content: summary } }]
