@@ -4,30 +4,38 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 dotenv.config();
-const app = express();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
+const HF_TOKEN = process.env.HF_TOKEN;
+
 app.post("/api/grok", async (req, res) => {
   try {
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+    const { messages } = req.body;
+    const userMessage = messages[messages.length - 1].content;
+
+    const response = await fetch("https://api-inference.huggingface.co/models/facebook/bart-large-cnn", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROK_API_KEY}`,
-        "Content-Type": "application/json",
+        "Authorization": `Bearer ${HF_TOKEN}`,
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({ inputs: userMessage })
     });
 
     const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error("Error:", err);
+    const summary = data[0]?.summary_text || "خلاصه در دسترس نیست";
+
+    res.json({
+      choices: [{ message: { content: summary } }]
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`✅ Grok Proxy Server running on http://localhost:${process.env.PORT || 3000}`);
-});
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
